@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class Hacker : MonoBehaviour {
 
     int level;
+    String message = "";
     enum Screen {MainMenu, Password, Win};
     Screen currentScreen;
 
@@ -15,14 +17,31 @@ public class Hacker : MonoBehaviour {
         currentScreen = Screen.MainMenu;
         Terminal.ClearScreen();
 
+        if (message != "") {
+            Terminal.WriteLine(message);
+        }
+
         Terminal.WriteLine("Hva ønsker du å hacke? \n 1. Biblioteket i P35 \n 2. Kontoret til Sigrun \n 3. Oraklenes topp-hemmelige data ");
-        Terminal.WriteLine("Skriv inn ditt valg (1, 2 eller 3): ");
+        Terminal.WriteLine("\nSkriv inn ditt valg (1, 2 eller 3): ");
     }
 
     void OnUserInput(string input) {
-        if (input.ToLower() == "meny") {
+        if (input.ToLower() == "meny") { //We can always go directly to MainMenu
             ShowMainMenu();
-        } else if (input == "1") {
+        } else if (currentScreen == Screen.MainMenu) {
+            RunMainMenu(input);
+        } else if (currentScreen == Screen.Password) {
+            RunPassword();
+        }
+    }
+
+    private void RunPassword() {
+        message = "FEIL PASSORD!";
+        ShowMainMenu();
+    }
+
+    void RunMainMenu(string input) {
+        if (input == "1") {
             level = 1;
             startGame();
         } else if (input == "2") {
@@ -33,10 +52,10 @@ public class Hacker : MonoBehaviour {
         } else {
             Terminal.WriteLine("Vennligst oppgi et gyldig hackermål");
         }
-     }
+    }
 
     void startGame() {
         currentScreen = Screen.Password;
-        Terminal.WriteLine("Du har valgt alternativ " + level);
+        Terminal.WriteLine("Vennligst oppgi ditt passord: ");
     }
 }
