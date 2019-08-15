@@ -10,17 +10,28 @@ public class Hacker : MonoBehaviour {
     //Game State
     int level;
     string password;
-    enum Screen {MainMenu, Password, Win};
+    enum Screen {Intro, MainMenu, Password, Win};
     Screen currentScreen;
+    int tries;
 
     // Start is called before the first frame update
     void Start() {
-        ShowMainMenu();
+        ShowIntro();
+    }
+
+    void ShowIntro() {
+        currentScreen = Screen.Intro;
+        Terminal.ClearScreen();
+
+        Terminal.WriteLine("Velkommen til Datatorget \nHacker Tool 2.0!");
+        Terminal.WriteLine("Skriv \"meny\" når som helst for \nå gå tilbake til hovedmenyen! \n\nGjør det nå for å starte programmet!");
     }
 
     void ShowMainMenu() {
         currentScreen = Screen.MainMenu;
         Terminal.ClearScreen();
+        tries = 0;
+
         Terminal.WriteLine("Hva ønsker du å hacke? \n 1. Biblioteket i P35 \n 2. Kontoret til Sigrun \n 3. Oraklenes topp-hemmelige data ");
         Terminal.WriteLine("\nSkriv inn ditt valg (1, 2 eller 3): ");
     }
@@ -40,7 +51,7 @@ public class Hacker : MonoBehaviour {
         bool isValidLevelNumber = (input == "1" || input == "2" || input == "3");
         if (isValidLevelNumber) {
             level = int.Parse(input);
-            startGame();
+            AskForPassword();
         } else if (input.ToLower() == "hello there") {
             Terminal.WriteLine("GENERAL KENOBI");
         } else {
@@ -48,10 +59,27 @@ public class Hacker : MonoBehaviour {
         }
     }
 
-    void startGame() {
+    void CheckPassword(string input) {
+        if (input == password) {
+            DisplayWinScreen();
+        } else {
+            tries--;
+            AskForPassword();
+        }
+    }
+
+    void AskForPassword() {
         currentScreen = Screen.Password;
         Terminal.ClearScreen();
+        if (tries == 0) {
+            SetRandomPassword();
+            tries = 3;
+        }
+        Terminal.WriteLine("Oppgi Passord, hint: " + password.Anagram());
+        Terminal.WriteLine("Gjenværende forsøk: " + tries);
+    }
 
+    void SetRandomPassword() {
         switch (level) {
             case 1:
                 password = level1Passwords[Random.Range(0, level1Passwords.Length)];
@@ -66,16 +94,6 @@ public class Hacker : MonoBehaviour {
                 Debug.LogError("Invalid level number!");
                 break;
         }
-
-        Terminal.WriteLine("Vennligst oppgi ditt passord: ");
-    }
-
-    void CheckPassword(string input) {
-        if (input == password) {
-            DisplayWinScreen();
-        } else {
-            Terminal.WriteLine("FEIL PASSORD!");
-        }
     }
 
     void DisplayWinScreen() {
@@ -87,7 +105,7 @@ public class Hacker : MonoBehaviour {
     void ShowLevelReward() {
         switch (level) {
             case 1:
-                Terminal.WriteLine("Du hacker biblioteket og har nå evig print credits!");
+                Terminal.WriteLine("Du hacker biblioteket og har nå evig \nprint credits!");
                 break;
             case 2:
                 Terminal.WriteLine("Du dobler lønna i \narbeidskontrakten din!");
