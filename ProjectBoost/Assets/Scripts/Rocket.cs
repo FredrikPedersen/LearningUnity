@@ -1,14 +1,19 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
-
+[DisallowMultipleComponent]
 public class Rocket : MonoBehaviour
 {
 
     [SerializeField] float rcsThrust = 200f;
     [SerializeField] float thrustPower = 15f;
+
     [SerializeField] AudioClip mainEngine;
     [SerializeField] AudioClip deathSound;
     [SerializeField] AudioClip levelCompleteSound;
+
+    [SerializeField] ParticleSystem mainEngineParticle;
+    [SerializeField] ParticleSystem deathParticle;
+    [SerializeField] ParticleSystem successParticle;
 
 
     Rigidbody rigidbody;
@@ -61,6 +66,7 @@ public class Rocket : MonoBehaviour
         state = State.Transcending;
         audioSource.Stop();
         audioSource.PlayOneShot(levelCompleteSound);
+        successParticle.Play();
         Invoke("LoadNextLevel", 1f); //Parameterize time
     }
 
@@ -68,6 +74,7 @@ public class Rocket : MonoBehaviour
     {
         state = State.Dying;
         audioSource.Stop();
+        deathParticle.Play();
         audioSource.PlayOneShot(deathSound);
         Invoke("LoadFirstLevel", 2f);
     }
@@ -90,6 +97,7 @@ public class Rocket : MonoBehaviour
         } else
         {
             audioSource.Stop();
+            mainEngineParticle.Stop();
         }
     }
 
@@ -101,6 +109,7 @@ public class Rocket : MonoBehaviour
         {
             audioSource.PlayOneShot(mainEngine);
         }
+        mainEngineParticle.Play();
     }
 
     private void ResondToRotateInput()
