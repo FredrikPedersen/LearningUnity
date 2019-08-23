@@ -4,8 +4,12 @@ using UnityEngine.SceneManagement;
 public class Rocket : MonoBehaviour
 {
 
-    [SerializeField]float rcsThrust = 200f;
+    [SerializeField] float rcsThrust = 200f;
     [SerializeField] float thrustPower = 15f;
+    [SerializeField] AudioClip mainEngine;
+    [SerializeField] AudioClip deathSound;
+    [SerializeField] AudioClip levelCompleteSound;
+
 
     Rigidbody rigidbody;
     AudioSource audioSource;
@@ -25,8 +29,8 @@ public class Rocket : MonoBehaviour
     {
         if (state == State.Alive) 
         { 
-            Thrust();
-            Rotate();
+            RespondToThrustInput();
+            ResondToRotateInput();
         }
     }
 
@@ -43,43 +47,63 @@ public class Rocket : MonoBehaviour
             case "Friendly":
                 break;
             case "Finish":
-                state = State.Transcending;
-                Invoke("LoadNextLevel", 1f); //Parameterize time
+                StartSuccessSequence();
                 break;
             default:
-                state = State.Dying;
-                Invoke("LoadFirstLevel", 2f);
+                StartFailureSequence();
                 break;
 
         }
     }
 
-    private void LoadNextLevel() {
+    private void StartSuccessSequence()
+    {
+        state = State.Transcending;
+        audioSource.Stop();
+        audioSource.PlayOneShot(levelCompleteSound);
+        Invoke("LoadNextLevel", 1f); //Parameterize time
+    }
+
+    private void StartFailureSequence()
+    {
+        state = State.Dying;
+        audioSource.Stop();
+        audioSource.PlayOneShot(deathSound);
+        Invoke("LoadFirstLevel", 2f);
+    }
+
+    private void LoadNextLevel() 
+    {
         SceneManager.LoadScene(1); //TODO Allow for more than 2 levels
     }
 
-    private void LoadFirstLevel() {
+    private void LoadFirstLevel() 
+    {
         SceneManager.LoadScene(0);
     }
 
-    private void Thrust()
+    private void RespondToThrustInput()
     {
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space)) 
         { //can thrust while rotating
-            rigidbody.AddRelativeForce(Vector3.up * thrustPower);
-
-            if (!audioSource.isPlaying)
-            {
-                audioSource.Play();
-            }
-        }
-        else
+            ApplyThrust();
+        } else
         {
             audioSource.Stop();
         }
     }
 
-    private void Rotate()
+    private void ApplyThrust()
+    {
+        rigidbody.AddRelativeForce(Vector3.up * thrustPower);
+
+        if (!audioSource.isPlaying)
+        {
+            audioSource.PlayOneShot(mainEngine);
+        }
+    }
+
+    private void ResondToRotateInput()
     {
 
         rigidbody.freezeRotation = true;
